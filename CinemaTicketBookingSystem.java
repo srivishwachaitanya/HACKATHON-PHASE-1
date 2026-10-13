@@ -1,64 +1,140 @@
-import java.util.Scanner;
 
-class MovieTicket {
-    private String movieName;
-    private double ticketPrice;
-    private int numberOfTickets;
+import java.util.*;
 
-    public MovieTicket(String movieName, double ticketPrice, int numberOfTickets) {
+class TicketBooking {
+    String customerName;
+    String movieName;
+    double ticketPrice;
+    int numberOfTickets;
+
+    double totalAmount;
+    double discount;
+    double finalAmount;
+    boolean bookingSuccessful;
+
+    TicketBooking(String customerName, String movieName,double ticketPrice, int numberOfTickets) {
+        this.customerName = customerName;
         this.movieName = movieName;
         this.ticketPrice = ticketPrice;
         this.numberOfTickets = numberOfTickets;
     }
 
-    public double calculateTotal() {
-        return ticketPrice * numberOfTickets;
+    TicketBooking(String customerName, String movieName,double ticketPrice) {
+        this(customerName, movieName, ticketPrice, 0);
     }
 
-    public double calculateDiscount() {
-        if (numberOfTickets >= 5) {
-            return calculateTotal() * 0.10;
+    void bookTickets() {
+        calculateAmount();
+    }
+
+    void bookTickets(int numberOfTickets) {
+        this.numberOfTickets = numberOfTickets;
+        calculateAmount();
+    }
+
+    void bookTickets(String movieName, double ticketPrice,int numberOfTickets) {
+        this.movieName = movieName;
+        this.ticketPrice = ticketPrice;
+        this.numberOfTickets = numberOfTickets;
+        calculateAmount();
+    }
+
+    void calculateAmount() {
+        bookingSuccessful =
+            customerName != null &&
+            !customerName.trim().isEmpty() &&
+            movieName != null &&
+            !movieName.trim().isEmpty() &&
+            ticketPrice > 0 &&
+            numberOfTickets > 0;
+
+        totalAmount = 0;
+        discount = 0;
+        finalAmount = 0;
+
+        if (bookingSuccessful) {
+            totalAmount = ticketPrice * numberOfTickets;
+
+            if (numberOfTickets >= 5) {
+                discount = totalAmount * 0.10;
+            }
+
+            finalAmount = totalAmount - discount;
         }
-        return 0.0;
     }
 
-    public double calculateFinalAmount() {
-        return calculateTotal() - calculateDiscount();
+    void displaySummary() {
+        displaySummary(true);
     }
 
-    public void displayBill() {
-        System.out.println("----- Cinema Ticket Booking Bill -----");
-        System.out.println("Movie Name        : " + movieName);
-        System.out.printf("Ticket Price      : %.2f%n", ticketPrice);
-        System.out.println("Number of Tickets : " + numberOfTickets);
-        System.out.printf("Total Amount      : %.2f%n", calculateTotal());
-        System.out.printf("Discount          : %.2f%n", calculateDiscount());
-        System.out.printf("Final Amount      : %.2f%n", calculateFinalAmount());
-        System.out.println("------- Thank you for Booking -------");
+    void displaySummary(boolean showTicketPrice) {
+        System.out.printf("%-19s: %s%n",
+                "Customer Name", customerName.toUpperCase(Locale.ROOT));
+
+        System.out.printf("%-19s: %s%n",
+                "Movie Name", movieName.toUpperCase(Locale.ROOT));
+
+        if (showTicketPrice) {
+            System.out.printf(Locale.US, "%-19s: Rs. %.2f%n",
+                    "Ticket Price", ticketPrice);
+        }
+
+        System.out.printf("%-19s: %d%n",
+                "Number of Tickets", numberOfTickets);
+
+        System.out.println();
+
+        System.out.printf("%-19s: %s%n",
+                "Booking Status",
+                bookingSuccessful ? "Booking Successful" : "Booking Failed");
+
+        System.out.printf(Locale.US, "%-19s: Rs. %.2f%n",
+                "Total Amount", totalAmount);
+
+        System.out.printf(Locale.US, "%-19s: Rs. %.2f%n",
+                "Discount", discount);
+
+        System.out.printf(Locale.US, "%-19s: Rs. %.2f%n",
+                "Final Amount", finalAmount);
+    }
+
+    boolean verifyCustomer(String expectedName) {
+        return customerName != null &&
+               expectedName != null &&
+               customerName.trim().equalsIgnoreCase(
+                   expectedName.trim());
     }
 }
 
 public class CinemaTicketBookingSystem {
     public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
+        System.out.println(
+            "========== CINEMA TICKET BOOKING ==========");
 
-        System.out.print("Enter movie name: ");
-        String movieName = sc.nextLine();
+        TicketBooking booking1 =
+            new TicketBooking("Sneha", "Avatar", 200.00, 5);
 
-        System.out.print("Enter ticket price: ");
-        double ticketPrice = sc.nextDouble();
+        booking1.bookTickets();
+        System.out.println();
+        booking1.displaySummary();
 
-        System.out.print("Enter number of tickets: ");
-        int numberOfTickets = sc.nextInt();
+        System.out.println();
 
-        MovieTicket ticket = new MovieTicket(movieName, ticketPrice, numberOfTickets);
+        TicketBooking booking2 =
+            new TicketBooking("Arjun", "Avatar", 200.00);
 
-        double total = ticket.calculateTotal();
-        double discount = ticket.calculateDiscount();
-        double finalAmount = ticket.calculateFinalAmount();
+        booking2.bookTickets(2);
+        booking2.displaySummary(false);
 
-        ticket.displayBill();
+        System.out.println("Customer Verification:");
 
-        sc.close();
+        if (booking1.verifyCustomer("sNeHa")) {
+            System.out.println("Names Match");
+        } else {
+            System.out.println("Names Do Not Match");
+        }
+
+        System.out.println(
+            "=============================================");
     }
 }
